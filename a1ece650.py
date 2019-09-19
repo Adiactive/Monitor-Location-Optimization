@@ -14,7 +14,6 @@ import re
 # store street info as a dictionary
 st = {}
 
-
 def add_street(_name, _coord):
     global st
     if _name[0] not in st:
