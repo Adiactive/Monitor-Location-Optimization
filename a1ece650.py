@@ -4,51 +4,55 @@ Rongzhi Gu
 
 test example:
 a "Weber Street" (2,-1) (2,2) (5,5) (5,6) (3,8)
+a "King Street S" (4,2) (4,8)
+a "Davenport Road" (1,4) (5,8)
+g
 
 9-18
 Error1:line overlap
+Error2:option input error (e.g. g with more args)
 """
 import sys
 import re
+from Class import *
 
-# store street info as a dictionary
-st = {}
 
-def add_street(_name, _coord):
-    global st
-    if _name[0] not in st:
-        st[_name[0]] = []
-    else:
-        print 'Error: %s specified for a street that has been added. Try using option c to change it' % _name
-        return False
-    for i in _coord:
-        st[_name[0]].append(tuple(eval(i)))
-    return True
-
-def parse_line(_line):
-    # _line = 'a "Weber Street" (2,-1) (2,2) (5,5) (5,6) (3,8)'
-    if _line[0] == 'a':
+def command_parser(_line, _st_info):
+    # option a for adding a street
+    if _line[0] == 'a' and _line[1] == ' ':
         name = re.findall(r'\"(.*)\"', _line)
         coord = re.findall(r'\(.*?\)', _line)
+        _st_info.add(name, coord)
+        _st_info.check_street()
         # print name
         # print coord
-        if not add_street(name, coord):
-            return
+        return
+    # option g for generating graph
+    if _line[0] == 'g' and _line[1] == ' ':
+        pass
+
+    # option r for removing a street
+    if _line[0] == 'r' and _line[1] == ' ':
+        pass
+
+    # option c for changing street info
+    if _line[0] == 'c' and _line[1] == ' ':
+        pass
     # print _line
+
+    # if not anyone above, return error meg
+    print('Error: error input, try one of the options "a, c, r, g"')
     return
 
+
 def main():
-    ### YOUR MAIN CODE GOES HERE
-    global st
-    ### sample code to read from stdin.
-    ### make sure to remove all spurious print statements as required
-    ### by the assignment
+    # YOUR MAIN CODE GOES HERE
+    st_info = StreetDatabase()
     while True:
         line = sys.stdin.readline()
         if line == '':
             break
-        parse_line(line)
-        print st
+        command_parser(line, st_info)
     # print 'Finished reading input'
     # return exit code 0 on successful termination
     sys.exit(0)
