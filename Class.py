@@ -22,6 +22,15 @@ class StreetDatabase(object):
                         self.st_data[current_st].append(tuple(eval(i)))
                     break
 
+    def remove(self, name):
+        if name[0].lower() not in [current_st.lower() for current_st in self.st_data]:
+            raise Exception('`r` specified for a street that has not been added. Try option `a` to add it')
+        else:
+            for current_st in self.st_data:
+                if name[0].lower() == current_st.lower():
+                    del self.st_data[current_st]
+                    break
+
     def check_street(self):
         print(self.st_data)
 
