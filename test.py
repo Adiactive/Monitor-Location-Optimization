@@ -1,4 +1,11 @@
-## A simple unit test example. Replace by your own tests
+"""
+error input example
+a "Weber Street" 1,2,3,4,5,6
+a "Weber Street" (1,2 (3,4) (5,6)
+a "Weber Street" (1,2)(3,4) (5,6)
+a"Weber Street" (1,2) (3,4) (5,6)
+a "Weber Street"(1,2) (3,4) (5,6)
+"""
 
 import sys
 import unittest
