@@ -48,6 +48,9 @@ class Point(object):
     def __str__(self):
         return repr(self)
 
+    def __eq__(self, other):
+        return (self.x, self.y) == (other.x, other.y)
+
 
 class Line(object):
     def __init__(self, p1, p2):
@@ -57,9 +60,24 @@ class Line(object):
     def __repr__(self):
         return repr(self.src) + ' --> ' + repr(self.dst)
 
+    def __hash__(self):
+        return hash((self.src, self.dst))
+
+    def __eq__(self, other):
+        return (self.src, self.dst) == (other.src, other.dst)
+
 class Graph(object):
     def __init__(self):
         self.vertex = []
         self.edge = []
+
+    def add_vertex(self, p):
+        if p not in self.vertex:
+            self.vertex.append(p)
+
+    def add_edge(self, p1, p2):
+        self.edge.append((p1, p2))
+
+
 
 
