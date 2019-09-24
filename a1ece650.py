@@ -11,6 +11,12 @@ c "Weber Street" (2,1) (2,2)
 g
 r "King Street S"
 g
+
+another:
+a "Lester Street" (2,-1) (2,2) (5,5) (2,8)
+a "Philip Street" (3,8) (3,1) (4,1) (4,8)
+a "University Avenue" (1,5)(8,5)
+g
 }
 
 bug fixing: segment overlap
@@ -35,7 +41,7 @@ def command_parser(_line):
 
             for i in coord:
                 if len(tuple(eval(i))) != 2 or ' ' in i:
-                    raise Exception("wrong coordinates")
+                    raise Exception("wrong coordinate format")
 
         # check args for `r`
         elif _line[0] == 'r' and _line[2] == '"' and len(name) == 1 \
@@ -80,11 +86,17 @@ def intersect(l1, l2):
 
     x_alpha = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4))
     x_beta = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
-    x = x_alpha / x_beta
 
     y_alpha = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)
     y_beta = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-    y = y_alpha / y_beta
+
+    if x_beta == 0 or y_beta == 0:
+        # for overlap cases
+        x = float('inf')
+        y = float('inf')
+    else:
+        x = x_alpha / x_beta
+        y = y_alpha / y_beta
 
     return Point(x, y)
 
@@ -101,6 +113,15 @@ def graph_printer(_graph):
         print("  <{0},{1}>,".format(_graph.vertex.index(_graph.edge[i][0]) + 1,
                                     _graph.vertex.index(_graph.edge[i][1]) + 1))
     print('}')
+
+
+def add_to_list(lst, obj):
+    if obj not in lst:
+        lst.append(obj)
+
+
+def is_between(line, point):
+    return min(line.src.x, line.dst.x) <= point.x <= max(line.src.x, line.dst.x)
 
 def graph_generator(_st_data):
     graph = Graph()
@@ -124,12 +145,20 @@ def graph_generator(_st_data):
                         intersect_point = intersect(pre_line, pos_line)
                         if pre_line not in intersections:
                             intersections[pre_line] = [pre_line.src, pre_line.dst]
-                        if intersect_point not in intersections[pre_line]:
-                            intersections[pre_line].append(intersect_point)
                         if pos_line not in intersections:
                             intersections[pos_line] = [pos_line.src, pos_line.dst]
-                        if intersect_point not in intersections[pos_line]:
-                            intersections[pos_line].append(intersect_point)
+                        if intersect_point.x == float('inf'):
+                            if is_between(pre_line, pos_line.src):
+                                add_to_list(intersections[pre_line], pos_line.src)
+                            if is_between(pre_line, pos_line.dst):
+                                add_to_list(intersections[pre_line], pos_line.dst)
+                            if is_between(pos_line, pre_line.src):
+                                add_to_list(intersections[pos_line], pre_line.src)
+                            if is_between(pos_line, pre_line.dst):
+                                add_to_list(intersections[pos_line], pre_line.dst)
+                        else:
+                            add_to_list(intersections[pre_line], intersect_point)
+                            add_to_list(intersections[pos_line], intersect_point)
 
     # generate vertices and edges
     for point_list in intersections.values():
@@ -140,6 +169,7 @@ def graph_generator(_st_data):
         graph.add_vertex(point_list[-1])
 
     return graph
+
 
 def main():
     st_data = StreetDatabase()

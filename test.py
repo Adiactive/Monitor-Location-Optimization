@@ -37,8 +37,12 @@ class MyTest(unittest.TestCase):
 
         with self.assertRaises(Exception):
             command_parser('a "Weber 135Street" (1,2) (3,4) (5,6)')
+
         with self.assertRaises(Exception):
-            command_parser('a "Weber 135Street" (1, 2)(3, -       4)')
+            command_parser('a "Weber Street" (1, 2)(3, -       4)')
+
+        with self.assertRaises(Exception):
+            command_parser('a "Weber Street" (1, 2    )(3, -4     )')
 
     def test_database(self):
         st_test = StreetDatabase()
