@@ -1,25 +1,6 @@
 """
 Rongzhi Gu
 20855042
-
-test input:
-a "Weber Street" (2,-1) (2,2) (5,5) (5,6) (3,8)
-a "King Street S" (4,2) (4,8)
-a "Davenport Road" (1,4) (5,8)
-g
-c "Weber Street" (2,1) (2,2)
-g
-r "King Street S"
-g
-
-another:
-a "Lester Street" (2,-1) (2,2) (5,5) (2,8)
-a "Philip Street" (3,8) (3,1) (4,1) (4,8)
-a "University Avenue" (1,5)(8,5)
-g
-}
-
-bug fixing: segment overlap
 """
 import sys
 import re
@@ -27,38 +8,26 @@ from Class import *
 
 
 def command_parser(_line):
-    arg_list = _line.split('"')
-    if ((_line[0] == 'a' or _line[0] == 'c' or _line[0] == 'r') and _line[1] == ' ') or \
-            _line[0] == 'g' and len(_line.strip()) == 1:
+    if re.search(r'(^[arc] )|(^g ?$)', _line) is None:
+        raise Exception("command unknown, try one of the options `a, c, r, g`")
+    else:
         name = re.findall(r'\"(.*)\"', _line)
         coord = re.findall(r'\(.*?\)', _line)
         # check args for `a` and `c`
-        if (_line[0] == 'a' or _line[0] == 'c') and _line[2] == '"' and len(name) == 1 \
-                and arg_list[2][0] == ' ' and coord != []:
-            for subs in name[0].split():
-                if not subs.isalpha():
-                    raise Exception("street name allows alphabetical and space characters only")
-
-            for i in coord:
-                if len(tuple(eval(i))) != 2 or ' ' in i:
-                    raise Exception("wrong coordinate format")
-
-        # check args for `r`
-        elif _line[0] == 'r' and _line[2] == '"' and len(name) == 1 \
-                and len(arg_list[2].strip()) == 0:
-            for subs in name[0].split():
-                if not subs.isalpha():
-                    raise Exception("street name allows alphabetical and space characters only")
-
-        # check args for `g`
-        elif _line[0] == 'g':
-            pass
-
+        if re.search(r'^[ac] \"[A-Za-z ]+\" (\(-?[0-9]+,-?[0-9]+\) ?)+\(-?[0-9]+,-?[0-9]+\)$', _line) is not None or \
+                re.search(r'^r \"[A-Za-z ]+\"$', _line) is not None or \
+                re.search(r'^g$', _line) is not None:
+            return _line[0], name, coord
         else:
-            raise Exception("wrong argument for option `%c`" % _line[0])
-        return _line[0], name, coord
-    else:
-        raise Exception("command unknown, try one of the options `a, c, r, g`")
+            if _line[0] == 'a' or _line[0] == 'c' or _line[0] == 'r':
+                if re.search(r'^[ac] \"[A-Za-z ]+\"', _line):
+                    raise Exception("wrong coordinate format")
+                elif _line[2] == '"' and len(name) == 1:
+                    raise Exception("street name allows alphabetical and space characters only")
+                else:
+                    raise Exception("wrong argument for option `%c`" % _line[0])
+            else:
+                raise Exception("wrong argument for option `c`, no argument required")
 
 
 def is_intersecting(l1, l2):
@@ -105,13 +74,20 @@ def graph_printer(_graph):
     # print vertices
     print('V = {')
     for i in range(len(_graph.vertex)):
-        print("  {0}:  ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
+        if i >= 9:
+            print("  {0}: ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
+        else:
+            print("  {0}:  ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
     print('}')
     # print edges
     print('E = {')
     for i in range(len(_graph.edge)):
-        print("  <{0},{1}>,".format(_graph.vertex.index(_graph.edge[i][0]) + 1,
-                                    _graph.vertex.index(_graph.edge[i][1]) + 1))
+        if i != len(_graph.edge) - 1:
+            print("  <{0},{1}>,".format(_graph.vertex.index(_graph.edge[i][0]) + 1,
+                                        _graph.vertex.index(_graph.edge[i][1]) + 1))
+        else:
+            print("  <{0},{1}>".format(_graph.vertex.index(_graph.edge[-1][0]) + 1,
+                                       _graph.vertex.index(_graph.edge[-1][1]) + 1))
     print('}')
 
 
@@ -122,6 +98,7 @@ def add_to_list(lst, obj):
 
 def is_between(line, point):
     return min(line.src.x, line.dst.x) <= point.x <= max(line.src.x, line.dst.x)
+
 
 def graph_generator(_st_data):
     graph = Graph()
@@ -197,14 +174,13 @@ def main():
                 graph = graph_generator(st_data)
                 graph_printer(graph)
 
-        except SyntaxError:
-            sys.stderr.write("Error: wrong coordinates\n")
+        # except SyntaxError:
+            # sys.stderr.write("Error: wrong coordinate format\n")
+        # except TypeError:
+            # sys.stderr.write("Error: wrong coordinate format\n")
         except Exception as exp:
             sys.stderr.write("Error: " + str(exp) + '\n')
 
-        # st_data.check_street()
-    # print 'Finished reading input'
-    # return exit code 0 on successful termination
     sys.exit(0)
 
 

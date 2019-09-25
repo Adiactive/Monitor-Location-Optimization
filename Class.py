@@ -37,6 +37,7 @@ class StreetDatabase(object):
     def check_street(self):
         print(self.st_data)
 
+
 class Point(object):
     def __init__(self, x, y):
         self.x = float(x)
@@ -54,6 +55,7 @@ class Point(object):
     def __hash__(self):
         return hash((self.x, self.y))
 
+
 class Line(object):
     def __init__(self, p1, p2):
         self.src = p1
@@ -67,6 +69,7 @@ class Line(object):
 
     def __eq__(self, other):
         return (self.src, self.dst) == (other.src, other.dst)
+
 
 class Graph(object):
     def __init__(self):

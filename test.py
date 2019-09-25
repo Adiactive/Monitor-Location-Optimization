@@ -1,12 +1,3 @@
-"""
-error input example
-a "Weber Street" 1,2,3,4,5,6
-a "Weber Street" (1,2 (3,4) (5,6)
-a "Weber Street" (1,2)(3,4) (5,6)
-a"Weber Street" (1,2) (3,4) (5,6)
-a "Weber Street"(1,2) (3,4) (5,6)
-"""
-
 import sys
 import unittest
 from a1ece650 import *
@@ -44,9 +35,24 @@ class MyTest(unittest.TestCase):
         with self.assertRaises(Exception):
             command_parser('a "Weber Street" (1, 2    )(3, -4     )')
 
+        with self.assertRaises(Exception):
+            command_parser('a "Weber Street" (1,2)(3)')
+
+        with self.assertRaises(Exception):
+            command_parser('a "Weber Street" (1,+2)(3,4)')
+
+        with self.assertRaises(Exception):
+            command_parser('a "Weber Street" (2+3,4)(3,4)')
+
+        with self.assertRaises(Exception):
+            command_parser('a "Weber Street" (2,)(3,4)')
+
     def test_database(self):
         st_test = StreetDatabase()
         st_test.add(['Weber Street'], ['(1,2)', '(3,4)'])
+
+        with self.assertRaises(Exception):
+            st_test.add(['Street'], ['(1,2)', '(1,2)'])
 
         with self.assertRaises(Exception):
             st_test.add(['Weber Street'], ['(1,2)', '(3,4)'])
