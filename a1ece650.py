@@ -20,10 +20,13 @@ def command_parser(_line):
             return _line[0], name, coord
         else:
             if _line[0] == 'a' or _line[0] == 'c' or _line[0] == 'r':
-                if re.search(r'^[ac] \"[A-Za-z ]+\"', _line):
+                if _line[0] == 'a' or _line[0] == 'c' and re.search(r'^[ac] \"[A-Za-z ]+\"', _line):
                     raise Exception("wrong coordinate format")
                 elif _line[2] == '"' and len(name) == 1:
-                    raise Exception("street name allows alphabetical and space characters only")
+                    if _line[0] == 'a' or _line[0] == 'c':
+                        raise Exception("street name allows alphabetical and space characters only")
+                    else:
+                        raise Exception("wrong argument for option `%c`" % _line[0])
                 else:
                     raise Exception("wrong argument for option `%c`" % _line[0])
             else:
@@ -74,8 +77,10 @@ def graph_printer(_graph):
     # print vertices
     print('V = {')
     for i in range(len(_graph.vertex)):
-        if i >= 9:
+        if 9 <= i <= 98:
             print("  {0}: ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
+        elif i >= 99:
+            print("  {0}:({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
         else:
             print("  {0}:  ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
     print('}')
@@ -120,22 +125,18 @@ def graph_generator(_st_data):
                 for pos_line in pos_st:
                     if is_intersecting(pre_line, pos_line):
                         intersect_point = intersect(pre_line, pos_line)
+                        if intersect_point.x == float('inf'):
+                            continue
+                        if intersect_point.y == -0:
+                            intersect_point.y = 0
+                        if intersect_point.x == -0:
+                            intersect_point.x = 0
                         if pre_line not in intersections:
                             intersections[pre_line] = [pre_line.src, pre_line.dst]
                         if pos_line not in intersections:
                             intersections[pos_line] = [pos_line.src, pos_line.dst]
-                        if intersect_point.x == float('inf'):
-                            if is_between(pre_line, pos_line.src):
-                                add_to_list(intersections[pre_line], pos_line.src)
-                            if is_between(pre_line, pos_line.dst):
-                                add_to_list(intersections[pre_line], pos_line.dst)
-                            if is_between(pos_line, pre_line.src):
-                                add_to_list(intersections[pos_line], pre_line.src)
-                            if is_between(pos_line, pre_line.dst):
-                                add_to_list(intersections[pos_line], pre_line.dst)
-                        else:
-                            add_to_list(intersections[pre_line], intersect_point)
-                            add_to_list(intersections[pos_line], intersect_point)
+                        add_to_list(intersections[pre_line], intersect_point)
+                        add_to_list(intersections[pos_line], intersect_point)
 
     # generate vertices and edges
     for point_list in intersections.values():
@@ -174,10 +175,6 @@ def main():
                 graph = graph_generator(st_data)
                 graph_printer(graph)
 
-        # except SyntaxError:
-            # sys.stderr.write("Error: wrong coordinate format\n")
-        # except TypeError:
-            # sys.stderr.write("Error: wrong coordinate format\n")
         except Exception as exp:
             sys.stderr.write("Error: " + str(exp) + '\n')
 
