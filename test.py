@@ -3,6 +3,7 @@ import unittest
 from a1ece650 import *
 from Class import *
 
+
 class MyTest(unittest.TestCase):
     def test_parser(self):
         with self.assertRaises(Exception):
@@ -78,6 +79,7 @@ class MyTest(unittest.TestCase):
         """A test that fails"""
         self.assertEqual(True, False)
     '''
+
 
 if __name__ == '__main__':
     unittest.main()

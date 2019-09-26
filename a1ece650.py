@@ -8,19 +8,19 @@ from Class import *
 
 
 def command_parser(_line):
-    if re.search(r'(^[arc] )|(^g ?$)', _line) is None:
+    if re.search(r'(^[arc] +)|(^g +\S*$)|(^g$)', _line) is None:
         raise Exception("command unknown, try one of the options `a, c, r, g`")
     else:
         name = re.findall(r'\"(.*)\"', _line)
         coord = re.findall(r'\(.*?\)', _line)
         # check args for `a` and `c`
-        if re.search(r'^[ac] \"[A-Za-z ]+\" (\(-?[0-9]+,-?[0-9]+\) ?)+\(-?[0-9]+,-?[0-9]+\)$', _line) is not None or \
-                re.search(r'^r \"[A-Za-z ]+\"$', _line) is not None or \
-                re.search(r'^g$', _line) is not None:
+        if re.search(r'^[ac] +\"[A-Za-z ]+\" +(\(-?[0-9]+,-?[0-9]+\) *){2,}$', _line) or \
+                re.search(r'^r +\"[A-Za-z ]+\" *$', _line) or \
+                re.search(r'^g *$', _line):
             return _line[0], name, coord
         else:
             if _line[0] == 'a' or _line[0] == 'c' or _line[0] == 'r':
-                if _line[0] == 'a' or _line[0] == 'c' and re.search(r'^[ac] \"[A-Za-z ]+\"', _line):
+                if (_line[0] == 'a' or _line[0] == 'c') and re.search(r'^[ac] +\"[A-Za-z ]+\"', _line):
                     raise Exception("wrong coordinate format")
                 elif _line[2] == '"' and len(name) == 1:
                     if _line[0] == 'a' or _line[0] == 'c':
@@ -30,7 +30,7 @@ def command_parser(_line):
                 else:
                     raise Exception("wrong argument for option `%c`" % _line[0])
             else:
-                raise Exception("wrong argument for option `c`, no argument required")
+                raise Exception("wrong argument for option `g`, no argument required")
 
 
 def is_intersecting(l1, l2):
@@ -73,14 +73,16 @@ def intersect(l1, l2):
     return Point(x, y)
 
 
+def is_between(line, point):
+    return min(line.src.x, line.dst.x) <= point.x <= max(line.src.x, line.dst.x)
+
+
 def graph_printer(_graph):
     # print vertices
     print('V = {')
     for i in range(len(_graph.vertex)):
-        if 9 <= i <= 98:
+        if i >= 9:
             print("  {0}: ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
-        elif i >= 99:
-            print("  {0}:({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
         else:
             print("  {0}:  ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
     print('}')
@@ -99,10 +101,6 @@ def graph_printer(_graph):
 def add_to_list(lst, obj):
     if obj not in lst:
         lst.append(obj)
-
-
-def is_between(line, point):
-    return min(line.src.x, line.dst.x) <= point.x <= max(line.src.x, line.dst.x)
 
 
 def graph_generator(_st_data):
@@ -125,8 +123,6 @@ def graph_generator(_st_data):
                 for pos_line in pos_st:
                     if is_intersecting(pre_line, pos_line):
                         intersect_point = intersect(pre_line, pos_line)
-                        if intersect_point.x == float('inf'):
-                            continue
                         if intersect_point.y == -0:
                             intersect_point.y = 0
                         if intersect_point.x == -0:
@@ -135,8 +131,18 @@ def graph_generator(_st_data):
                             intersections[pre_line] = [pre_line.src, pre_line.dst]
                         if pos_line not in intersections:
                             intersections[pos_line] = [pos_line.src, pos_line.dst]
-                        add_to_list(intersections[pre_line], intersect_point)
-                        add_to_list(intersections[pos_line], intersect_point)
+                        if intersect_point.x == float('inf'):
+                            if is_between(pre_line, pos_line.src):
+                                add_to_list(intersections[pre_line], pos_line.src)
+                            if is_between(pre_line, pos_line.dst):
+                                add_to_list(intersections[pre_line], pos_line.dst)
+                            if is_between(pos_line, pre_line.src):
+                                add_to_list(intersections[pos_line], pre_line.src)
+                            if is_between(pos_line, pre_line.dst):
+                                add_to_list(intersections[pos_line], pre_line.dst)
+                        else:
+                            add_to_list(intersections[pre_line], intersect_point)
+                            add_to_list(intersections[pos_line], intersect_point)
 
     # generate vertices and edges
     for point_list in intersections.values():
@@ -154,7 +160,7 @@ def main():
     while True:
         try:
             line = sys.stdin.readline()
-            if line == '':
+            if not line:
                 break
             cmd = command_parser(line)
 
