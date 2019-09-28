@@ -14,15 +14,15 @@ def command_parser(_line):
         name = re.findall(r'\"(.*)\"', _line)
         coord = re.findall(r'\(.*?\)', _line)
         # check args for `a` and `c`
-        if re.search(r'^[ac] +\"[A-Za-z ]+\" +(\(-?[0-9]+,-?[0-9]+\) *){2,}$', _line) or \
-                re.search(r'^r +\"[A-Za-z ]+\" *$', _line) or \
+        if re.search(r'^[ac] +\" *[A-Za-z]+[A-Za-z ]*\" +(\(-?[0-9]+,-?[0-9]+\) *){2,}$', _line) or \
+                re.search(r'^r +\" *[A-Za-z]+[A-Za-z ]*\" *$', _line) or \
                 re.search(r'^g *$', _line):
             return _line[0], name, coord
         else:
             if _line[0] == 'a' or _line[0] == 'c' or _line[0] == 'r':
-                if (_line[0] == 'a' or _line[0] == 'c') and re.search(r'^[ac] +\"[A-Za-z ]+\"', _line):
+                if (_line[0] == 'a' or _line[0] == 'c') and re.search(r'^[ac] +\" *[A-Za-z]+[A-Za-z ]*\"', _line):
                     raise Exception("wrong coordinate format")
-                elif _line[2] == '"' and len(name) == 1:
+                elif _line.split()[1][0] == '"' and len(name) == 1:
                     if _line[0] == 'a' or _line[0] == 'c':
                         raise Exception("street name allows alphabetical and space characters only")
                     else:
