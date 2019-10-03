@@ -6,20 +6,8 @@
 using namespace std;
 
 //for error handling
-class Exception: public exception
-{
-public:
-    explicit Exception(const char* message): _msg(message) {}
-    explicit Exception(std::string  message): _msg(std::move(message)) {}
-
-    ~Exception() noexcept override= default;
-
-    const char* what() const noexcept override{
-        return _msg.c_str();
-    }
-
-protected:
-    string _msg;
+struct Exception : std::runtime_error {
+    explicit Exception(const char *msg) : std::runtime_error(msg) {}
 };
 
 char command_parser(istringstream &input) {
@@ -57,15 +45,12 @@ char command_parser(istringstream &input) {
 //    }
 
 int main(int argc, char** argv) {
+    std::string line;
+    //std::getline(std::cin, line);
     // read from stdin until EOF
-    while (!std::cin.eof()) {
+    while (!getline(cin, line).eof()) {
         try {
             // read a line of input until EOL and store in a string
-            std::string line;
-            std::getline(std::cin, line);
-            if (std::cin.eof())
-                break;
-
             // create an input stream based on the line to parse it
             std::istringstream input(line);
             char cmd = command_parser(input);
@@ -74,23 +59,33 @@ int main(int argc, char** argv) {
                 input >> vertexNum;
                 if (input.fail())
                     throw Exception("can not parse vertex number");
-
             }
 
             else if (cmd == 'E'){
+                char separator;
+                unsigned vertex;
+                vector<unsigned> edge;
+                while (!input.eof()) {
+                    input >> vertex;
+                    if (input.fail()) {
+                        input >> separator;
+                        cout << separator;
+                    }
+                    else
+                        edge.push_back(vertex);
+                }
+                for (unsigned x : edge) {
+                    cout << x;
+                }
 
             }
             else {
 
             }
-            if (input.eof())
-                continue;
         }
         catch(Exception &exp){
             std::cerr << "Error:" << exp.what() << endl;
         }
-
-
     }
-    return 0;
+    exit(0) ;
 }
