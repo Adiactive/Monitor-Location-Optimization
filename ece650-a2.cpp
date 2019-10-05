@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include <regex>
+#include "Graph.h"
 using namespace std;
 
 //for error handling
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
     while (!cin.eof()) {
         std::string line;
         getline(cin, line);
+        Graph<int>* graph = NULL;
         if (line.empty()) {
             continue;
         }
@@ -36,24 +38,42 @@ int main(int argc, char** argv) {
             std::istringstream input(line);
             char cmd = command_parser(input);
             if (cmd == 'V'){
-                unsigned vertexNum;
-                input >> vertexNum;
+                int vtxNum;
+                input >> vtxNum;
                 if (input.fail())
                     throw Exception("can not parse vertex number");
+                graph = new Graph<int>(vtxNum);
             }
             else if (cmd == 'E'){
                 regex reg("(\\d)+");
                 smatch results;
-                vector<int> edges;
-                string::const_iterator search_start(line.cbegin());
-                while ( regex_search(search_start, line.cend(), results, reg)) {
-                    edges.push_back(stoi(results[0].str()));
-                    search_start = results.suffix().first;
-                }
-                for (int x : edges) {
-                    cout << x << endl;
+                int src, dst, count = 0;
+                char c;
+                input >> c;
+                while(input)
+                {
+                    if((c>='0')&&(c<='9'))
+                    {
+                        input.putback(c);
+                        input >> src;
+                        input >>c;
+                        input >>dst;
+                        cout << src << ' ' << dst << endl;
+                    }
+                    input >> c;
                 }
 
+//                string::const_iterator start(line.cbegin());
+//                while ( regex_search(start, line.cend(), results, reg)) {
+//                    count += 1;
+//                    if (count == 1)
+//                        int src = stoi(results[0].str());
+//                    else {
+//                        int dst = stoi(results[0].str());
+//
+//                    }
+//                    start = results.suffix().first;
+//                }
             }
         }
         catch(Exception &exp){

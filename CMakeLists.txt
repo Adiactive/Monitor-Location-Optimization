@@ -9,7 +9,7 @@ set (CMAKE_CXX_FLAGS "-std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
 
 # create the main executable
 ## add additional .cpp files if needed
-add_executable(ece650-a2 ece650-a2.cpp )
+add_executable(ece650-a2 ece650-a2.cpp Graph.cpp Graph.h)
 
 # create the executable for tests
 add_executable(tests test.cpp)
