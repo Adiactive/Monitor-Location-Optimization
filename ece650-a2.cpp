@@ -7,10 +7,7 @@
 #include "Graph.h"
 using namespace std;
 
-//for error handling
-struct Exception : std::runtime_error {
-    explicit Exception(const char *msg) : std::runtime_error(msg) {}
-};
+#define default_w 1
 
 // parse command option
 char command_parser(istringstream &input) {
@@ -23,12 +20,12 @@ char command_parser(istringstream &input) {
 }
 
 int main(int argc, char** argv) {
-
+    Graph<int>* graph = nullptr;
+    int vtxNum = 0;
     // read from stdin until EOF
     while (!cin.eof()) {
         std::string line;
         getline(cin, line);
-        Graph<int>* graph = NULL;
         if (line.empty()) {
             continue;
         }
@@ -38,47 +35,54 @@ int main(int argc, char** argv) {
             std::istringstream input(line);
             char cmd = command_parser(input);
             if (cmd == 'V'){
-                int vtxNum;
                 input >> vtxNum;
                 if (input.fail())
                     throw Exception("can not parse vertex number");
+                if (graph)
+                    delete graph;
                 graph = new Graph<int>(vtxNum);
             }
             else if (cmd == 'E'){
-                regex reg("(\\d)+");
-                smatch results;
-                int src, dst, count = 0;
+                int src, dst;
+                vector<int> vertex;
                 char c;
                 input >> c;
-                while(input)
+                while (input)
                 {
-                    if((c>='0')&&(c<='9'))
+                    if ((c >= '0') && (c <= '9'))
                     {
                         input.putback(c);
                         input >> src;
-                        input >>c;
-                        input >>dst;
-                        cout << src << ' ' << dst << endl;
+                        input >> c; //skip comma
+                        input >> dst;
+                        if (src < 0 || dst < 0 || src >  vtxNum- 1 || dst > vtxNum - 1 || src == dst)
+                            throw Exception("vertex index out of range");
+                        else if (graph->exist(src, dst))
+                            throw Exception("edge has already existed");
+                        else {
+                            vertex.push_back(src);
+                            vertex.push_back(dst);
+                        }
                     }
                     input >> c;
                 }
-
-//                string::const_iterator start(line.cbegin());
-//                while ( regex_search(start, line.cend(), results, reg)) {
-//                    count += 1;
-//                    if (count == 1)
-//                        int src = stoi(results[0].str());
-//                    else {
-//                        int dst = stoi(results[0].str());
-//
-//                    }
-//                    start = results.suffix().first;
-//                }
+                for (size_t i = 0; i < vertex.size() ; i += 2) {
+                    graph->insert(vertex[i], vertex[i + 1], default_w);
+                    graph->insert(vertex[i + 1], vertex[i], default_w);
+                }
+                graph->show(cout);
+                vertex.clear();
+            }
+            else {
+                
             }
         }
         catch(Exception &exp){
             std::cerr << "Error:" << exp.what() << endl;
         }
     }
+    if (graph)
+        delete(graph);
+    graph = nullptr;
     exit(0) ;
 }
