@@ -5,108 +5,85 @@
 #ifndef ECE650_A2_GRAPH_H
 #define ECE650_A2_GRAPH_H
 
-#include <cstdlib>
+#include <list>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
 
-//for error handling
-struct Exception : std::runtime_error {
-    explicit Exception(const char *msg) : std::runtime_error(msg) {}
-};
-
-//struct for linked list node
-//import template class and weight in case there are additional requirements
-template<class T>
-struct Node
-{
-    Node() {
-        adjVex = w = nextArc = NULL;
-    }
-    Node(int vertex, T weight, Node *next) {
-        adjVex=vertex;
-        w=weight;
-        nextArc=next;
-    }
-    int adjVex;
-    T w;
-    Node* nextArc;
-};
-
-template<class T>
 class Graph {
 public:
     explicit Graph(int mSize);
     ~Graph();
     bool exist(int u, int v)const;
-    bool insert(int u, int v, int w);
-    void show(std::ostream &out);
+    bool insert(int u, int v);
+    bool path(int src, int dst);
 
-    int size;
 protected:
-    Node<T> ** head;
+    vector<list<int>> head;
+    int size;
+
+    bool BFS(int src, int dst, int *previous);
 };
 
-template<class T>
-Graph<T>::Graph(int mSize) {
+Graph::Graph(int mSize) {
     size = mSize;
-    head = new Node<T>*[size];
-    for (int i = 0; i < size; i++)
-        head[i]=NULL;
+    head = vector<list<int>>(size);
 }
 
-template<class T>
-Graph<T>::~Graph() {
-    Node<T>*p,*q;
-    for(int i = 0; i < size; i++)
-    {
-        p=head[i];
-        q=p;
-        while (p){
-            p=p->nextArc;
-            delete q;
-            q=p;
-        }
-    }
-    delete []head;
-}
+Graph::~Graph() = default;
 
-template<class T>
-bool Graph<T>::insert(int u, int v, int w) {
-    if (u < 0 || v < 0 || u > size - 1 || v > size - 1 || u == v)
-        return false;
-    if (exist(u, v))
-        return false;
-    auto* p = new Node<T>(v, w, head[u]);
-    head[u] = p;
+bool Graph::insert(int u, int v) {
+    head[u].push_back(v);
     return true;
 }
 
-template<class T>
-bool Graph<T>::exist(int u, int v) const {
+bool Graph::exist(int u, int v) const {
     if (u < 0 || v < 0 || u > size - 1 || v > size - 1 || u == v)
         return false;
-    Node<T>* p = head[u];
-    while (p) {
-        if (p -> adjVex == v)
-            return true;
-        p=p->nextArc;
-    }
-    return false;
+    auto it = find(head[u].cbegin(), head[u].cend(), v);
+    return (it != head[u].cend());
 }
 
-template<class T>
-void Graph<T>::show(std::ostream &out) {
-    Node<T> *p;
-    out<<"Contents of LGraph:"<<std::endl;
-    for(int i=0;i<size;i++)
-    {
-        out<<i;
-        for(p=head[i];p;p=p->nextArc)
-        {
-            std::cout<<"->"<<p->adjVex;
-        }
-        out<<std::endl;
+bool Graph::path(int src, int dst) {
+    int previous[size];
+    for (int i = 0; i < size; ++i)
+        previous[i] = -1;
+    if (BFS(dst, src, previous)){
+        int cur = src;
+        do {
+            cout << cur << '-';
+            cur = previous[cur];
+        }while (cur != dst);
+        cout << dst << endl;
+        return true;
     }
-    out<<"Total number of vertex(n): "<<size<<std::endl;
-    out<<std::endl;
+    else
+        return false;
+}
+
+bool Graph::BFS(int src, int dst, int *previous) {
+    int visited[size];
+    for (int i = 0; i < size; i++)
+        visited[i]=false;
+    queue<int> q;
+    visited[src] = true;
+    q.push(src);
+    while (!q.empty()){
+        src = q.front();
+        if (src == dst){
+            return true;
+        }
+        q.pop();
+        list<int>::const_iterator iter;
+        for (iter = head[src].cbegin(); iter != head[src].cend(); ++iter)
+            if (!visited[*iter]) {
+                previous[*iter] = src;
+                visited[*iter] = true;
+                q.push(*iter);
+            }
+    }
+    return false;
 }
 
 #endif //ECE650_A2_GRAPH_H
