@@ -16,7 +16,7 @@ public:
     explicit Graph(int mSize);
     ~Graph();
     bool exist(int u, int v)const;
-    bool insert(int u, int v);
+    void insert(int u, int v);
     bool path(int src, int dst);
 
 protected:
@@ -33,9 +33,9 @@ Graph::Graph(int mSize) {
 
 Graph::~Graph() = default;
 
-bool Graph::insert(int u, int v) {
-    head[u].push_back(v);
-    return true;
+void Graph::insert(int u, int v) {
+    if (!this->exist(u, v) && u != v)
+        head[u].push_back(v);
 }
 
 bool Graph::exist(int u, int v) const {
