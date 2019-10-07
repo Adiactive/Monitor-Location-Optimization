@@ -59,10 +59,10 @@ int main(int argc, char** argv) {
                         input >> src;
                         input >> c; //skip comma
                         input >> dst;
-                        if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1 || src == dst)
+                        if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1)
                             throw Exception("vertex index out of range");
                         else if (graph->exist(src, dst))
-                            throw Exception("edge is already existing");
+                            throw Exception("add duplicate edge(s)");
                         else {
                             vertex.push_back(src);
                             vertex.push_back(dst);
@@ -70,6 +70,12 @@ int main(int argc, char** argv) {
                     }
                     input >> c;
                 }
+//                for (size_t i = 2; i < vertex.size() ; i += 2) {
+//                    for (size_t j = 0; j < i; j += 2)
+//                        if ((vertex[j] == vertex[i] and vertex[j + 1] == vertex[i + 1]) ||
+//                                (vertex[j] == vertex[i + 1] and vertex[j + 1] == vertex[i]))
+//                            throw Exception("add duplicate edge(s)");
+//                }
                 for (size_t i = 0; i < vertex.size() ; i += 2) {
                     graph->insert(vertex[i], vertex[i + 1]);
                     graph->insert(vertex[i + 1], vertex[i]);
@@ -81,10 +87,10 @@ int main(int argc, char** argv) {
             else {
                 int src, dst;
                 input >> src >> dst;
-                if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1 || src == dst)
+                if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1)
                     throw Exception("vertex index out of range");
                 if (!graph->path(src, dst))
-                    throw Exception("no path founded");
+                    throw Exception("no path exist");
             }
         }
         catch(Exception &exp){

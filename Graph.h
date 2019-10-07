@@ -16,7 +16,7 @@ public:
     explicit Graph(int mSize);
     ~Graph();
     bool exist(int u, int v)const;
-    bool insert(int u, int v);
+    void insert(int u, int v);
     bool path(int src, int dst);
 
 protected:
@@ -33,9 +33,9 @@ Graph::Graph(int mSize) {
 
 Graph::~Graph() = default;
 
-bool Graph::insert(int u, int v) {
-    head[u].push_back(v);
-    return true;
+void Graph::insert(int u, int v) {
+    if (!this->exist(u, v) && u != v)
+        head[u].push_back(v);
 }
 
 bool Graph::exist(int u, int v) const {
@@ -63,6 +63,12 @@ bool Graph::path(int src, int dst) {
 }
 
 bool Graph::BFS(int src, int dst, int *previous) {
+    // for identical src and dst cases
+    if (src == dst) {
+        previous[dst] = src;
+        return true;
+    }
+
     int visited[size];
     for (int i = 0; i < size; i++)
         visited[i]=false;
@@ -71,16 +77,14 @@ bool Graph::BFS(int src, int dst, int *previous) {
     q.push(src);
     while (!q.empty()){
         src = q.front();
-        if (src == dst){
+        if (src == dst)
             return true;
-        }
         q.pop();
-        list<int>::const_iterator iter;
-        for (iter = head[src].cbegin(); iter != head[src].cend(); ++iter)
-            if (!visited[*iter]) {
-                previous[*iter] = src;
-                visited[*iter] = true;
-                q.push(*iter);
+        for (auto val : head[src])
+            if (!visited[val]) {
+                previous[val] = src;
+                visited[val] = true;
+                q.push(val);
             }
     }
     return false;
