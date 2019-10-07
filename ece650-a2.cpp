@@ -81,10 +81,10 @@ int main(int argc, char** argv) {
             else {
                 int src, dst;
                 input >> src >> dst;
-                if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1 || src == dst)
+                if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1)
                     throw Exception("vertex index out of range");
                 if (!graph->path(src, dst))
-                    throw Exception("no path founded");
+                    throw Exception("no path exist");
             }
         }
         catch(Exception &exp){

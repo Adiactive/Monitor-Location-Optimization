@@ -63,6 +63,12 @@ bool Graph::path(int src, int dst) {
 }
 
 bool Graph::BFS(int src, int dst, int *previous) {
+    // for identical src and dst cases
+    if (src == dst) {
+        previous[dst] = src;
+        return true;
+    }
+
     int visited[size];
     for (int i = 0; i < size; i++)
         visited[i]=false;
@@ -71,16 +77,14 @@ bool Graph::BFS(int src, int dst, int *previous) {
     q.push(src);
     while (!q.empty()){
         src = q.front();
-        if (src == dst){
+        if (src == dst)
             return true;
-        }
         q.pop();
-        list<int>::const_iterator iter;
-        for (iter = head[src].cbegin(); iter != head[src].cend(); ++iter)
-            if (!visited[*iter]) {
-                previous[*iter] = src;
-                visited[*iter] = true;
-                q.push(*iter);
+        for (auto val : head[src])
+            if (!visited[val]) {
+                previous[val] = src;
+                visited[val] = true;
+                q.push(val);
             }
     }
     return false;
