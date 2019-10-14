@@ -21,17 +21,16 @@ char ParseCmd(istringstream &input) {
 
 int main(int argc, char** argv) {
     Graph* graph = nullptr;
+    string line;
     int vtxNum = 0;
     // read from stdin until EOF
     while (!cin.eof()) {
-        string line;
-        getline(cin, line);
-        if (line.empty()) {
-            continue;
-        }
         try {
             // read a line of input until EOL and store in a string
             // create an input stream based on the line to parse it
+            getline(cin, line);
+            if (line.empty())
+                continue;
             istringstream input(line);
             char cmd = ParseCmd(input);
 
