@@ -29,8 +29,12 @@ int main(int argc, char** argv) {
             // read a line of input until EOL and store in a string
             // create an input stream based on the line to parse it
             getline(cin, line);
-            if (line.empty())
-                continue;
+            if (line.empty()) {
+                if (!cin.eof())
+                    throw Exception("no command detected");
+                else
+                    continue;
+            }
             istringstream input(line);
             char cmd = ParseCmd(input);
 
