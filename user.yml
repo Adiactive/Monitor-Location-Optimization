@@ -4,4 +4,5 @@ last: LAST_NAME
 watiam: WATIAM_ID
 student: STUDENT_ID
 email: email
+python: 2 
 ...
