@@ -75,23 +75,18 @@ def is_between(line, point):
 
 def graph_printer(_graph):
     # print vertices
-    print('V = {')
-    for i in range(len(_graph.vertex)):
-        if i >= 9:
-            print("  {0}: ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
-        else:
-            print("  {0}:  ({1:.2f},{2:.2f})".format(i + 1, _graph.vertex[i].x, _graph.vertex[i].y))
-    print('}')
+    print('V {0}'.format(len(_graph.vertex)))
+
     # print edges
-    print('E = {')
+    sys.stdout.write('E {')
     for i in range(len(_graph.edge)):
         if i != len(_graph.edge) - 1:
-            print("  <{0},{1}>,".format(_graph.vertex.index(_graph.edge[i][0]) + 1,
-                                        _graph.vertex.index(_graph.edge[i][1]) + 1))
+            sys.stdout.write("<{0},{1}>,".format(_graph.vertex.index(_graph.edge[i][0]),
+                                                 _graph.vertex.index(_graph.edge[i][1])))
         else:
-            print("  <{0},{1}>".format(_graph.vertex.index(_graph.edge[-1][0]) + 1,
-                                       _graph.vertex.index(_graph.edge[-1][1]) + 1))
-    print('}')
+            sys.stdout.write("<{0},{1}>".format(_graph.vertex.index(_graph.edge[-1][0]),
+                                                _graph.vertex.index(_graph.edge[-1][1])))
+    sys.stdout.write('}\n')
 
 
 def add_to_list(lst, obj):

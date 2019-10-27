@@ -11,13 +11,23 @@
 #include <algorithm>
 using namespace std;
 
+struct Point {
+    int x;
+    int y;
+};
+
+struct Line {
+    Point src;
+    Point dst;
+};
+
 class Graph {
 public:
     explicit Graph(int mSize);
     ~Graph();
-    bool Exist(int u, int v)const;
-    void Insert(int u, int v);
-    bool Path(int src, int dst);
+    bool exist(int u, int v)const;
+    void insert(int u, int v);
+    bool path(int src, int dst);
 
 protected:
     vector<list<int>> head;
@@ -33,19 +43,19 @@ Graph::Graph(int mSize) {
 
 Graph::~Graph() = default;
 
-void Graph::Insert(int u, int v) {
-    if (!this->Exist(u, v) && u != v)
+void Graph::insert(int u, int v) {
+    if (!this->exist(u, v) && u != v)
         head[u].push_back(v);
 }
 
-bool Graph::Exist(int u, int v) const {
+bool Graph::exist(int u, int v) const {
     if (u < 0 || v < 0 || u > size - 1 || v > size - 1 || u == v)
         return false;
     auto it = find(head[u].cbegin(), head[u].cend(), v);
     return (it != head[u].cend());
 }
 
-bool Graph::Path(int src, int dst) {
+bool Graph::path(int src, int dst) {
     int previous[size];// store the previous one of a vertex in a path
     for (int i = 0; i < size; ++i)
         previous[i] = -1;

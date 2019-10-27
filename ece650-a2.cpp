@@ -1,16 +1,13 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include "Error.h"
 #include "Graph.h"
 using namespace std;
 
-//for error handling
-struct Exception : runtime_error {
-    explicit Exception(const char *msg) : runtime_error(msg) {}
-};
 
 // parse command option
-char ParseCmd(istringstream &input) {
+char parseCmd(istringstream &input) {
     char cmd;
     input >> cmd;
     if (input.fail() || (cmd != 'V' && cmd != 'E' && cmd != 's')) {
@@ -36,7 +33,7 @@ int main(int argc, char** argv) {
                     continue;
             }
             istringstream input(line);
-            char cmd = ParseCmd(input);
+            char cmd = parseCmd(input);
 
             //initialize graph
             if (cmd == 'V'){
@@ -63,7 +60,7 @@ int main(int argc, char** argv) {
                         input >> dst;
                         if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1)
                             throw Exception("vertex index out of range");
-                        else if (graph->Exist(src, dst))
+                        else if (graph->exist(src, dst))
                             throw Exception("add duplicate edge(s)");
                         else {
                             vertex.push_back(src);
@@ -73,8 +70,8 @@ int main(int argc, char** argv) {
                     input >> c;
                 }
                 for (size_t i = 0; i < vertex.size() ; i += 2) {
-                    graph->Insert(vertex[i], vertex[i + 1]);
-                    graph->Insert(vertex[i + 1], vertex[i]);
+                    graph->insert(vertex[i], vertex[i + 1]);
+                    graph->insert(vertex[i + 1], vertex[i]);
                 }
                 vertex.clear();
             }
@@ -85,7 +82,7 @@ int main(int argc, char** argv) {
                 input >> src >> dst;
                 if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1)
                     throw Exception("vertex index out of range");
-                if (!graph->Path(src, dst))
+                if (!graph->path(src, dst))
                     throw Exception("no path Exist");
             }
         }
