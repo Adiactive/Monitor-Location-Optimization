@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
                     continue;
             }
             istringstream input(line);
+            cout << line << endl;
             char cmd = parseCmd(input);
 
             //initialize graph
@@ -44,7 +45,7 @@ int main(int argc, char** argv) {
                 graph = new Graph(vtxNum);
             }
 
-                //initialize edge
+            //initialize edge
             else if (cmd == 'E'){
                 int src, dst;
                 vector<int> vertex; // store src and dst vertex index in case error input are detected
@@ -76,7 +77,7 @@ int main(int argc, char** argv) {
                 vertex.clear();
             }
 
-                //search path
+            //search path
             else {
                 int src, dst;
                 input >> src >> dst;

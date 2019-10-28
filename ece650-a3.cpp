@@ -27,6 +27,17 @@ void runA1() {
     throw Exception("can not run ece650-a1.py");
 }
 
+void runA2() {
+    //set argument for ece650-a2
+    char* argv[] = {
+            (char*)"./ece650-a2",
+            nullptr
+    };
+
+    execvp("./ece650-a2", argv);
+    throw Exception("can not run ece650-a2");
+}
+
 int main (int argc, char **argv) {
     vector<pid_t> kids;
     pid_t childPid;
@@ -47,7 +58,7 @@ int main (int argc, char **argv) {
             runRdmGen(argv);
         }
         else if (childPid < 0)
-            throw Exception("can not fork");
+            throw Exception("can not fork for rgen");
 
         kids.push_back(childPid);
 
@@ -57,10 +68,10 @@ int main (int argc, char **argv) {
         //create a process for a1
         childPid = fork();
         if (childPid == 0) {
+            //redirect stdout to write end of a1ToA2
+            dup2(a1ToA2[1], STDOUT_FILENO);
             //redirect stdin to read end of rToA1
             dup2(rToA1[0], STDIN_FILENO);
-            //redirect stdin to read end of a1ToA2
-            //dup2(a1ToA2[1], STDOUT_FILENO);
             close(rToA1[0]);
             close(rToA1[1]);
             close(a1ToA2[0]);
@@ -70,15 +81,59 @@ int main (int argc, char **argv) {
             runA1();
         }
         else if (childPid < 0)
-            throw Exception("can not fork");
+            throw Exception("can not fork for a1");
 
-        while (!std::cin.eof()) {
-            // read a line of input until EOL and store in a string
-            std::string line;
-            std::getline(std::cin, line);
-            if (line.size () > 0)
-                std::cout << "[a3]: " << line << std::endl;
-        }
+        kids.push_back(childPid);
+
+        //redirect stdin to read end of a1ToA2
+            dup2(a1ToA2[0], STDIN_FILENO);
+            close(rToA1[0]);
+            close(rToA1[1]);
+            close(a1ToA2[0]);
+            close(a1ToA2[1]);
+
+            //run a2
+            runA2();
+
+//        //create a process for a2
+//        childPid = fork();
+//        if (childPid == 0) {
+//            //redirect stdin to read end of a1ToA2
+//            dup2(a1ToA2[0], STDIN_FILENO);
+//            close(rToA1[0]);
+//            close(rToA1[1]);
+//            close(a1ToA2[0]);
+//            close(a1ToA2[1]);
+//
+//            //run a2
+//            runA2();
+//        }
+//        else if (childPid < 0)
+//            throw Exception("can not fork for a2");
+//
+//        kids.push_back(childPid);
+//
+//        //read s commands from keyboard
+//        //redirect stdout to write end of a1ToA2
+//        dup2(a1ToA2[1], STDOUT_FILENO);
+//        close(rToA1[0]);
+//        close(rToA1[1]);
+//        close(a1ToA2[0]);
+//        close(a1ToA2[1]);
+//
+//        while (!cin.eof()) {
+//            // read a line of input until EOL and store in a string
+//            string line;
+//            getline(std::cin, line);
+//            if (!line.empty())
+//                cout << line << endl;
+//        }
+//
+//        for (pid_t k : kids) {
+//            int status;
+//            kill(k, SIGTERM);
+//            waitpid(k, &status, 0);
+//        }
     }
     catch(Exception &exp){
         cerr << "Error: " << exp.what() << endl;
