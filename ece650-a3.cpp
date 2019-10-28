@@ -3,6 +3,7 @@
 #include <csignal>
 #include <vector>
 #include "Error.h"
+#include <fcntl.h>
 using namespace std;
 
 
@@ -43,9 +44,13 @@ int main (int argc, char **argv) {
     pid_t childPid;
 
     try {
-        //create a pipe for rgen and a1
-        int rToA1[2];
+        //create pipes
+        int rToA1[2], a1ToA2[2];
+        //pipe for rgen and a1
         pipe(rToA1);
+        //pipe for a1 and a2
+        pipe(a1ToA2);
+
         //create a process for random input generator
         childPid = fork();
         if (childPid == 0) {
@@ -53,7 +58,8 @@ int main (int argc, char **argv) {
             dup2(rToA1[1], STDOUT_FILENO);
             close(rToA1[0]);
             close(rToA1[1]);
-
+            close(a1ToA2[0]);
+            close(a1ToA2[1]);
             //run random generator
             runRdmGen(argv);
         }
@@ -62,21 +68,17 @@ int main (int argc, char **argv) {
 
         kids.push_back(childPid);
 
-        //create a pipe for a1 and a2
-        int a1ToA2[2];
-        pipe(a1ToA2);
         //create a process for a1
         childPid = fork();
         if (childPid == 0) {
-            //redirect stdout to write end of a1ToA2
-            dup2(a1ToA2[1], STDOUT_FILENO);
             //redirect stdin to read end of rToA1
             dup2(rToA1[0], STDIN_FILENO);
+            //redirect stdout to write end of a1ToA2
+            dup2(a1ToA2[1], STDOUT_FILENO);
             close(rToA1[0]);
             close(rToA1[1]);
             close(a1ToA2[0]);
             close(a1ToA2[1]);
-
             //run a1
             runA1();
         }
@@ -85,55 +87,46 @@ int main (int argc, char **argv) {
 
         kids.push_back(childPid);
 
-        //redirect stdin to read end of a1ToA2
+        //create a process for a2
+        childPid = fork();
+        if (childPid == 0) {
+            //redirect stdin to read end of a1ToA2
             dup2(a1ToA2[0], STDIN_FILENO);
-            close(rToA1[0]);
-            close(rToA1[1]);
             close(a1ToA2[0]);
             close(a1ToA2[1]);
+            close(rToA1[0]);
+            close(rToA1[1]);
 
             //run a2
             runA2();
+        }
+        else if (childPid < 0)
+            throw Exception("can not fork for a2");
 
-//        //create a process for a2
-//        childPid = fork();
-//        if (childPid == 0) {
-//            //redirect stdin to read end of a1ToA2
-//            dup2(a1ToA2[0], STDIN_FILENO);
-//            close(rToA1[0]);
-//            close(rToA1[1]);
-//            close(a1ToA2[0]);
-//            close(a1ToA2[1]);
-//
-//            //run a2
-//            runA2();
-//        }
-//        else if (childPid < 0)
-//            throw Exception("can not fork for a2");
-//
-//        kids.push_back(childPid);
-//
-//        //read s commands from keyboard
-//        //redirect stdout to write end of a1ToA2
-//        dup2(a1ToA2[1], STDOUT_FILENO);
-//        close(rToA1[0]);
-//        close(rToA1[1]);
-//        close(a1ToA2[0]);
-//        close(a1ToA2[1]);
-//
-//        while (!cin.eof()) {
-//            // read a line of input until EOL and store in a string
-//            string line;
-//            getline(std::cin, line);
-//            if (!line.empty())
-//                cout << line << endl;
-//        }
-//
-//        for (pid_t k : kids) {
-//            int status;
-//            kill(k, SIGTERM);
-//            waitpid(k, &status, 0);
-//        }
+        kids.push_back(childPid);
+
+        //read s commands from keyboard
+        //redirect stdout to write end of a1ToA2
+        dup2(a1ToA2[1], STDOUT_FILENO);
+        close(rToA1[0]);
+        close(rToA1[1]);
+        close(a1ToA2[0]);
+        close(a1ToA2[1]);
+
+        while (!cin.eof()) {
+            // read a line of input until EOL and store in a string
+            string line;
+            getline(std::cin, line);
+            if (!line.empty())
+                cout << line << endl;
+        }
+
+        for (pid_t k : kids) {
+            int status;
+            kill(k, SIGTERM);
+            waitpid(k, &status, 0);
+        }
+
     }
     catch(Exception &exp){
         cerr << "Error: " << exp.what() << endl;

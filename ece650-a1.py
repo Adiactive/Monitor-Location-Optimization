@@ -87,6 +87,7 @@ def graph_printer(_graph):
             sys.stdout.write("<{0},{1}>".format(_graph.vertex.index(_graph.edge[-1][0]),
                                                 _graph.vertex.index(_graph.edge[-1][1])))
     sys.stdout.write('}\n')
+    sys.stdout.flush()
 
 
 def add_to_list(lst, obj):

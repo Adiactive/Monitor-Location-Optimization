@@ -33,13 +33,13 @@ int main(int argc, char** argv) {
                     continue;
             }
             istringstream input(line);
-            cout << line << endl;
             char cmd = parseCmd(input);
 
             //initialize graph
             if (cmd == 'V'){
+                cout << line << endl;
                 input >> vtxNum;
-                if (input.fail() || vtxNum <= 0)
+                if (input.fail() || vtxNum < 0)
                     throw Exception("wrong vertex number");
                 delete graph;
                 graph = new Graph(vtxNum);
@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
 
             //initialize edge
             else if (cmd == 'E'){
+                cout << line << endl;
                 int src, dst;
                 vector<int> vertex; // store src and dst vertex index in case error input are detected
                 char c = 0; // read separators
