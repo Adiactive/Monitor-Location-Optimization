@@ -5,7 +5,7 @@ project(ece650-a2)
 ## Project specific configurations go here
 
 # enable c++11 support
-set (CMAKE_CXX_FLAGS "-std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS "-std=c++11 -pthread -Wall ${CMAKE_CXX_FLAGS}")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/run)
 
 # create the main executable
