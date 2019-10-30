@@ -4,6 +4,7 @@
 #include <vector>
 #include "Error.h"
 #include <fcntl.h>
+#include <thread>
 using namespace std;
 
 
@@ -37,6 +38,16 @@ void runA2() {
 
     execvp("./ece650-a2", argv);
     throw Exception("can not run ece650-a2");
+}
+
+void checkRgen(vector<pid_t> _kids) {
+    while (!waitpid(_kids[0], nullptr, WNOHANG));
+    for (pid_t k : _kids) {
+        int status;
+        kill(k, SIGTERM);
+        waitpid(k, &status, 0);
+    }
+    exit(0);
 }
 
 int main (int argc, char **argv) {
@@ -113,12 +124,18 @@ int main (int argc, char **argv) {
         close(a1ToA2[0]);
         close(a1ToA2[1]);
 
+        //terminate driver program when rgen exits
+        thread t(checkRgen, kids);
+        t.detach();
+
         while (!cin.eof()) {
-            // read a line of input until EOL and store in a string
+            // read a line of input until EOF
             string line;
             getline(std::cin, line);
-            if (!line.empty())
-                cout << line << endl;
+            if (line.empty())
+                if (cin.eof())
+                    continue;
+            cout << line << endl;
         }
 
         for (pid_t k : kids) {

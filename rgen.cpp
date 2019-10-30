@@ -38,12 +38,12 @@ int getRandom(int min, int max) {
     return randomData;
 }
 
-bool isIntersect(Line l1, Line l2) {
+bool isIntersect(Line l1, Line l2, bool diffSt) {
     int x1 = l1.src.x, x2 = l1.dst.x, x3 = l2.src.x, x4 = l2.dst.x,
         y1 = l1.src.y, y2 = l1.dst.y, y3 = l2.src.y, y4 = l2.dst.y;
 
     //for neibouring lines
-    if (x2 == x3 && y2 == y3) {
+    if (x2 == x3 && y2 == y3 && !diffSt) {
         if ((x2 - x1) * (y4 - y1) - (y2 - y1) * (x4 - x1)) {
             return false;
         }
@@ -67,7 +67,8 @@ bool isIntersect(Line l1, Line l2) {
               ((x4 - x1) * (y2 - y1) - (y4 - y1) * (x2 - x1))) > 0);
 }
 
-bool isValid(Line _line, const vector<Line> &_thisSt, const vector<Line> &_allSt) {
+bool isValid(Line _line, const vector<Line> &_thisSt, const vector<vector<Line>> &_allSt,
+             bool &_haveIntersect, bool &_lastLine) {
     //zero-length
     if (_line.src.x == _line.dst.x && _line.src.y == _line.dst.y)
         return false;
@@ -75,19 +76,26 @@ bool isValid(Line _line, const vector<Line> &_thisSt, const vector<Line> &_allSt
 
     //intersect with line-segment from the same street
     for (const auto& l : _thisSt) {
-        if (isIntersect(l, _line))
+        if (isIntersect(l, _line, false))
             return false;
     }
 
     //overlap with other streets
-    for (const auto& l : _allSt) {
-        if ((_line.src.x == l.src.x && _line.src.y == l.src.y &&
-             _line.dst.x == l.dst.x && _line.dst.y == l.dst.y) ||
-             (_line.src.x == l.dst.x && _line.src.y == l.dst.y &&
-              _line.dst.x == l.src.x && _line.dst.y == l.src.y))
-            return false;
+    for (const auto& s : _allSt) {
+        for (const auto& l : s) {
+            if ((_line.src.x == l.src.x && _line.src.y == l.src.y &&
+                 _line.dst.x == l.dst.x && _line.dst.y == l.dst.y) ||
+                (_line.src.x == l.dst.x && _line.src.y == l.dst.y &&
+                 _line.dst.x == l.src.x && _line.dst.y == l.src.y))
+                return false;
+            if (isIntersect(l, _line, true))
+                _haveIntersect = true;
+        }
     }
-    return true;
+
+    //no intersections acorss all streets
+    return !(_lastLine && !_haveIntersect);
+
 }
 
 void genInput(int _maxStNum, int _maxLineNum, int _corRange, vector<string> &_stName) {
@@ -99,7 +107,9 @@ void genInput(int _maxStNum, int _maxLineNum, int _corRange, vector<string> &_st
     //generate inputs
     //randomly generate the number of streets and line-segments
     int stNum = getRandom(2, _maxStNum);
-    vector<Line> thisSt, allSt;
+    vector<Line> thisSt;
+    vector<vector<Line>> allSt;
+    bool haveIntersect = false, lastLine;
     for (int j = 0; j < stNum; ++j) {
         //generate street name alphabetically
         string name;
@@ -111,6 +121,7 @@ void genInput(int _maxStNum, int _maxLineNum, int _corRange, vector<string> &_st
         thisSt.clear();
         int lineNum = getRandom(1, _maxLineNum);
         for (int k = 0; k < lineNum; ++k) {
+            lastLine = ((j == stNum - 1) && (k == lineNum - 1));
             int count = DE_ATTEMPT_NUM;
             while (count) {
                 Point src{};
@@ -128,9 +139,8 @@ void genInput(int _maxStNum, int _maxLineNum, int _corRange, vector<string> &_st
                 Line line = {src, dst};
 
                 //check if valid
-                if (isValid(line, thisSt, allSt)) {
+                if (isValid(line, thisSt, allSt, haveIntersect, lastLine)) {
                     thisSt.push_back(line);
-                    allSt.push_back(line);
                     break;
                 }
                 else
@@ -142,8 +152,9 @@ void genInput(int _maxStNum, int _maxLineNum, int _corRange, vector<string> &_st
                 throw Exception(msg.c_str());
             }
         }
+        allSt.push_back(thisSt);
 
-        //output sepecification to stdout(a1)
+        //issue a commands to stdout(a1)
         cout << "a " << '"' << name << '"';
         for (const auto& l : thisSt)
             printf(" (%d,%d)", l.src.x, l.src.y);
