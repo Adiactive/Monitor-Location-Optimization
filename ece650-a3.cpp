@@ -5,6 +5,7 @@
 #include "Error.h"
 #include <fcntl.h>
 #include <thread>
+#include <sys/wait.h>
 using namespace std;
 
 
