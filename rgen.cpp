@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <vector>
+#include <sys/poll.h>
 #include "Error.h"
 #include "Graph.h"
 
@@ -197,6 +198,15 @@ int main(int argc, char** argv) {
 
         while (true) {
             genInput(maxStNum, maxLineNum, corRange, stName);
+
+            //exit while receiving EOF from stdin
+            struct pollfd fds{};
+            int ret;
+            fds.fd = 0;
+            fds.events = POLLIN;
+            ret = poll(&fds, 1, 0);
+            if(ret == 1)
+                break;
 
             //wait for generating the next input
             sleep(getRandom(5, maxWaitTime));
