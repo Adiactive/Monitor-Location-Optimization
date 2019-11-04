@@ -196,21 +196,20 @@ int main(int argc, char** argv) {
                     break;
             }
 
-        while (true) {
+        struct pollfd fds{};
+        int ret = 0;
+        fds.fd = 0;
+        fds.events = POLLIN;
+
+        //exit while receiving EOF from stdin
+        while (ret != 1) {
             genInput(maxStNum, maxLineNum, corRange, stName);
 
             //wait for generating the next input
             sleep(getRandom(5, maxWaitTime));
 
-            //exit while receiving EOF from stdin
-            struct pollfd fds{};
-            int ret;
-            fds.fd = 0;
-            fds.events = POLLIN;
+            //check stdin status
             ret = poll(&fds, 1, 0);
-            if(ret == 1)
-                break;
-
         }
 
     }
