@@ -199,6 +199,9 @@ int main(int argc, char** argv) {
         while (true) {
             genInput(maxStNum, maxLineNum, corRange, stName);
 
+            //wait for generating the next input
+            sleep(getRandom(5, maxWaitTime));
+
             //exit while receiving EOF from stdin
             struct pollfd fds{};
             int ret;
@@ -208,8 +211,6 @@ int main(int argc, char** argv) {
             if(ret == 1)
                 break;
 
-            //wait for generating the next input
-            sleep(getRandom(5, maxWaitTime));
         }
 
     }
