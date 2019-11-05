@@ -100,24 +100,13 @@ bool isValid(Line _line, const vector<Line> &_thisSt, const vector<vector<Line>>
 }
 
 void genInput(int _maxStNum, int _maxLineNum, int _corRange, vector<string> &_stName) {
-    //issue r commands to clear streets and clear vector
-    for (const auto& st : _stName)
-        cout << "r " << '"' << st << '"' << endl;
-    _stName.clear();
-
     //generate inputs
-    //randomly generate the number of streets and line-segments
+    //generate the number of streets randomly
     int stNum = getRandom(2, _maxStNum);
     vector<Line> thisSt;
     vector<vector<Line>> allSt;
     bool haveIntersect = false, lastLine;
     for (int j = 0; j < stNum; ++j) {
-        //generate street name alphabetically
-        string name;
-        name.assign(j / 26 + 1, char(j % 26 + 65));
-        name.append(" Street");
-        _stName.push_back(name);
-
         //generate line-segments randomly
         thisSt.clear();
         int lineNum = getRandom(1, _maxLineNum);
@@ -154,12 +143,25 @@ void genInput(int _maxStNum, int _maxLineNum, int _corRange, vector<string> &_st
             }
         }
         allSt.push_back(thisSt);
+    }
+
+    //issue r commands to clear existing streets
+    for (const auto& st : _stName)
+        cout << "r " << '"' << st << '"' << endl;
+    _stName.clear();
+
+    for (int i = 0; i < stNum ; ++i) {
+        //generate street name alphabetically
+        string name;
+        name.assign(i / 26 + 1, char(i % 26 + 65));
+        name.append(" Street");
+        _stName.push_back(name);
 
         //issue a commands to stdout(a1)
         cout << "a " << '"' << name << '"';
-        for (const auto& l : thisSt)
+        for (const auto &l : allSt[i])
             printf(" (%d,%d)", l.src.x, l.src.y);
-        printf(" (%d,%d)\n", thisSt.back().dst.x, thisSt.back().dst.y);
+        printf(" (%d,%d)\n", allSt[i].back().dst.x, allSt[i].back().dst.y);
     }
 
     //issue a g command
