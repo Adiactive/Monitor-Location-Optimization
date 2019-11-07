@@ -56,6 +56,32 @@ int main (int argc, char **argv) {
     pid_t childPid;
 
     try {
+        //check arguments
+        int cmd;
+        while ((cmd = getopt(argc, argv, "s:n:l:c:")) != -1)
+            switch (cmd) {
+                case 's':
+                    if ((int)strtol(optarg, nullptr, 10) < 2)
+                        throw Exception("-s option requires an integer >= 2");
+                    continue;
+                case 'n':
+                    if ((int)strtol(optarg, nullptr, 10) < 1)
+                        throw Exception("-n option requires an integer >= 1");
+                    continue;
+                case 'l':
+                    if ((int)strtol(optarg, nullptr, 10) < 5)
+                        throw Exception("-l option requires an integer >= 5");
+                    continue;
+                case 'c':
+                    if ((int)strtol(optarg, nullptr, 10) < 1)
+                        throw Exception("-c option requires an integer >= 1");
+                    continue;
+                case '?':
+                    throw Exception("wrong option or argument");
+                default:
+                    break;
+            }
+
         //create pipes
         int rToA1[2], a1ToA2[2];
         //pipe for rgen and a1

@@ -178,19 +178,27 @@ int main(int argc, char** argv) {
         //parse options and arguments
         // expected options are 's value', 'n value', 'l value' and 'c value'
         int cmd;
-        while (( cmd = getopt(argc, argv, "s:n:l:c:")) != -1)
+        while ((cmd = getopt(argc, argv, "s:n:l:c:")) != -1)
             switch (cmd) {
                 case 's':
                     maxStNum = (int)strtol(optarg, nullptr, 10);
+                    if (maxStNum < 2)
+                        throw Exception("-s option requires an integer >= 2");
                     continue;
                 case 'n':
                     maxLineNum = (int)strtol(optarg, nullptr, 10);
+                    if (maxLineNum < 1)
+                        throw Exception("-n option requires an integer >= 1");
                     continue;
                 case 'l':
                     maxWaitTime = (int)strtol(optarg, nullptr, 10);
+                    if (maxWaitTime < 5)
+                        throw Exception("-l option requires an integer >= 5");
                     continue;
                 case 'c':
                     corRange = (int)strtol(optarg, nullptr, 10);
+                    if (corRange < 1)
+                        throw Exception("-c option requires an integer >= 1");
                     continue;
                 case '?':
                     throw Exception("wrong option or argument");
