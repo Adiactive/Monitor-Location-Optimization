@@ -178,6 +178,7 @@ int main(int argc, char** argv) {
         //parse options and arguments
         // expected options are 's value', 'n value', 'l value' and 'c value'
         int cmd;
+        opterr = 0;
         while ((cmd = getopt(argc, argv, "s:n:l:c:")) != -1)
             switch (cmd) {
                 case 's':

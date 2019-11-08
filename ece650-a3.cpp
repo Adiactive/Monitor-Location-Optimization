@@ -47,6 +47,7 @@ int main (int argc, char **argv) {
     try {
         //check arguments
         int cmd;
+        opterr = 0;
         while ((cmd = getopt(argc, argv, "s:n:l:c:")) != -1)
             switch (cmd) {
                 case 's':
