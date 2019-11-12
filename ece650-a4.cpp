@@ -7,20 +7,6 @@
 #include "minisat/core/Solver.h"
 using namespace std;
 
-/*
-V 3
-E {<1,0>,<1,2>}
-V 3
-E {<2,1>,<0,2>}
-V 5
-E {<0,4>,<4,1>,<0,3>,<3,4>,<3,2>,<1,3>}
-V 5
-E {<0,1>,<0,2>,<3,2>,<3,4>,<1,4>}
-V 7
-E {<1,0>,<0,2>,<0,3>,<2,4>,<3,4>,<6,5>}
-
-*/
-
 //for error handling
 struct Exception : std::runtime_error {
     explicit Exception(const char *msg) : runtime_error(msg) {}
@@ -107,8 +93,8 @@ void getVtxCover(int _vtxNum, const vector<int>& _edges) {
 char parseCmd(istringstream &input) {
     char cmd;
     input >> cmd;
-    if (input.fail() || (cmd != 'V' && cmd != 'E' && cmd != 's')) {
-        throw Exception("unknown command option, expect `V, E, s`");
+    if (input.fail() || (cmd != 'V' && cmd != 'E')) {
+        throw Exception("unknown command option, expect `V, E`");
     }
     return cmd;
 }
