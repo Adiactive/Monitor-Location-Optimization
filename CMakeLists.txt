@@ -19,7 +19,7 @@ include_directories(${CMAKE_SOURCE_DIR}/minisat)
 
 # create the main executable
 ## add additional .cpp files if needed
-add_executable(ece650-prj ece650-prj.cpp)
+add_executable(ece650-prj ece650-prj.cpp vtxcover.h)
 # link MiniSAT libraries
 target_link_libraries(ece650-prj minisat-lib-static)
 
