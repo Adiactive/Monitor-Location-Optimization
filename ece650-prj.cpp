@@ -45,7 +45,7 @@ int main() {
                     throw Exception("wrong vertex number");
             }
 
-                //read edges
+            //read edges
             else if (cmd == 'E') {
                 int src = 0, dst = 0;
                 vector<int> edges; // store src and dst vertex index in case error input are detected
@@ -69,25 +69,52 @@ int main() {
                     input >> c;
                 }
 
-
+                vector<int> results[3];
                 //CNF-SAT-VC
-                thread t1(CNF_SAT_VC, vtxNum, edges);
-                t1.join();
-                //CNF_SAT_VC(vtxNum, edges);
+                thread t1(CNF_SAT_VC, vtxNum, edges, ref(results[0]));
 
                 //APPROX_VC_1
-                thread t2(APPROX_VC_1,vtxNum, edges);
-                t2.join();
-                //APPROX_VC_1(vtxNum, edges);
+                thread t2(APPROX_VC_1,vtxNum, edges, ref(results[1]));
 
                 //APPROX_VC_2
-                thread t3(APPROX_VC_2,vtxNum, edges);
-                t3.join();
-                //APPROX_VC_2(vtxNum, edges);
+                thread t3(APPROX_VC_2, edges, ref(results[2]));
 
-//                t1.join();
-//                t2.join();
-//                t3.join();
+                t1.join();
+                t2.join();
+                t3.join();
+
+                //print results
+                //CNF-SAT-VC
+                cout << "CNF-SAT-VC: ";
+                for (size_t i = 0; i < results[0].size(); ++i) {
+                    cout << results[0][i];
+                    if (i != results[0].size() - 1)
+                        cout << ' ';
+                }
+                cout << endl;
+
+                //APPROX-VC-1
+                cout << "APPROX-VC-1: ";
+                for (size_t i = 0; i < results[1].size(); ++i) {
+                    cout << results[1][i];
+                    if (i != results[1].size() - 1)
+                        cout << ' ';
+                }
+                cout << endl;
+
+                //APPROX-VC-2
+                cout << "APPROX-VC-2: ";
+                for (size_t i = 0; i < results[2].size(); ++i) {
+                    cout << results[2][i];
+                    if (i != results[2].size() - 1)
+                        cout << ' ';
+                }
+                cout << endl;
+
+                //clear all the results
+                for (auto r : results) {
+                    r.clear();
+                }
                 edges.clear();
             }
         }

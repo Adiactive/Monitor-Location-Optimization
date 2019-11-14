@@ -12,7 +12,7 @@
 #include "minisat/core/Solver.h"
 using namespace std;
 
-void CNF_SAT_VC(int _vtxNum, const vector<int>& _edges) {
+void CNF_SAT_VC(int _vtxNum, const vector<int>& _edges, vector<int>& _result) {
     //allocate on the heap so that we can reset later if needed
     std::unique_ptr<Minisat::Solver> solver(new Minisat::Solver());
     bool res;
@@ -72,27 +72,23 @@ void CNF_SAT_VC(int _vtxNum, const vector<int>& _edges) {
         }
     }
 
+
     //print vertex cover
     int count = _coverSize;
-    cout << "CNF-SAT-VC: ";
     for (int i = 0; i < _vtxNum; ++i) {
         for (int j = 0; j < _coverSize; ++j) {
             if (!Minisat::toInt(solver->modelValue(allLit[i * _coverSize + j]))) {
-                cout << i;
+                _result.push_back(i);
                 count--;
-                if (count)
-                    cout << ' ';
-                break;
+                if (!count)
+                    return;
             }
-
         }
     }
-    cout << endl;
 }
 
-void APPROX_VC_1 (int _vtxNum, vector<int> _edges) {
+void APPROX_VC_1 (int _vtxNum, vector<int> _edges, vector<int>& _result) {
     int* degree = new int[_vtxNum];
-    vector<int> result;
     while (!_edges.empty()) {
         //get the vertex of highest degree
         int maxDegree = 0;
@@ -106,7 +102,7 @@ void APPROX_VC_1 (int _vtxNum, vector<int> _edges) {
             }
         }
 
-        result.push_back(maxDegVtx);
+        _result.push_back(maxDegVtx);
 
         //delete all edges incident on that vertex
         for (auto it = _edges.begin(); it != _edges.end();) {
@@ -117,21 +113,11 @@ void APPROX_VC_1 (int _vtxNum, vector<int> _edges) {
         }
     }
 
-    //print vertex cover
-    cout << "APPROX-VC-1: ";
-    sort(result.begin(), result.end());
-    for (size_t i = 0; i < result.size(); ++i) {
-        cout << result[i];
-        if (i != result.size() - 1)
-            cout << ' ';
-    }
-    cout << endl;
-
+    sort(_result.begin(), _result.end());
     delete[] degree;
 }
 
-void APPROX_VC_2 (int _vtxNum, vector<int> _edges) {
-    vector<int> result;
+void APPROX_VC_2 (vector<int> _edges, vector<int>& _result) {
     while (!_edges.empty()) {
         //pick an edge, add both their vertex to vertex cover
         //and delete all edges attached to them
@@ -144,19 +130,11 @@ void APPROX_VC_2 (int _vtxNum, vector<int> _edges) {
             else
                 it += 2;
         }
-        result.push_back(u);
-        result.push_back(v);
+        _result.push_back(u);
+        _result.push_back(v);
     }
 
-    //print vertex cover
-    cout << "APPROX-VC-2: ";
-    sort(result.begin(), result.end());
-    for (size_t i = 0; i < result.size(); ++i) {
-        cout << result[i];
-        if (i != result.size() - 1)
-            cout << ' ';
-    }
-    cout << endl;
+    sort(_result.begin(), _result.end());
 }
 
 #endif //ECE650_PRJ_VTXCOVER_H
