@@ -16,7 +16,7 @@ void getVtxCover(int _vtxNum, const vector<int>& _edges) {
     //allocate on the heap so that we can reset later if needed
     std::unique_ptr<Minisat::Solver> solver(new Minisat::Solver());
     bool res;
-    int _coverSize = 1; //vertex cover size
+    int _coverSize = 0; //vertex cover size
     vector<Minisat::Lit> allLit;
     Minisat::vec<Minisat::Lit> vecLit;
     while (true) {
@@ -147,6 +147,7 @@ int main() {
                     input >> c;
                 }
 
+                //compute minimum-sized vertex cover
                 getVtxCover(vtxNum, edges);
 
                 edges.clear();
