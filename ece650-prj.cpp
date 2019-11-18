@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <vector>
-#include <thread>
+#include <pthread.h>
 #include "vtxcover.h"
 using namespace std;
 
@@ -69,19 +69,28 @@ int main() {
                     input >> c;
                 }
 
+                pthread_t threads[3];
                 vector<int> results[3];
+                struct ArgStruct args[3]{
+                    {vtxNum, edges, &results[0]},
+                    {vtxNum, edges, &results[1]},
+                    {vtxNum, edges, &results[2]}
+                };
+
                 //CNF-SAT-VC
-                thread t1(CNF_SAT_VC, vtxNum, edges, ref(results[0]));
+                if (pthread_create(&threads[0], nullptr, &CNF_SAT_VC, (void*)&args[0]))
+                    throw Exception("cannot create thread of CNF-SAT-VC");
 
                 //APPROX_VC_1
-                thread t2(APPROX_VC_1,vtxNum, edges, ref(results[1]));
+                if (pthread_create(&threads[1], nullptr, &APPROX_VC_1, (void*)&args[1]))
+                    throw Exception("cannot create thread of APPROX_VC_1");
 
                 //APPROX_VC_2
-                thread t3(APPROX_VC_2, edges, ref(results[2]));
+                if (pthread_create(&threads[2], nullptr, &APPROX_VC_2, (void*)&args[2]))
+                    throw Exception("cannot create thread of APPROX_VC_2");
 
-                t1.join();
-                t2.join();
-                t3.join();
+                for (auto & t : threads)
+                    pthread_join(t, nullptr);
 
                 //print results
                 //CNF-SAT-VC
