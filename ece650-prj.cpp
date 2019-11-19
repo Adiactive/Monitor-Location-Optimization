@@ -98,7 +98,7 @@ int main() {
                 for (size_t i = 0; i < results[0].size(); ++i) {
                     cout << results[0][i];
                     if (i != results[0].size() - 1)
-                        cout << ' ';
+                        cout << ',';
                 }
                 cout << endl;
 
@@ -107,7 +107,7 @@ int main() {
                 for (size_t i = 0; i < results[1].size(); ++i) {
                     cout << results[1][i];
                     if (i != results[1].size() - 1)
-                        cout << ' ';
+                        cout << ',';
                 }
                 cout << endl;
 
@@ -116,7 +116,7 @@ int main() {
                 for (size_t i = 0; i < results[2].size(); ++i) {
                     cout << results[2][i];
                     if (i != results[2].size() - 1)
-                        cout << ' ';
+                        cout << ',';
                 }
                 cout << endl;
 
