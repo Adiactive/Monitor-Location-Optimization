@@ -35,6 +35,13 @@ void* CNF_SAT_VC(void* args) {
         for (int i = 0; i < _vtxNum * _coverSize; ++i)
             allLit.push_back(Minisat::mkLit(solver -> newVar()));
 
+        //set literals above diagonal to false
+        for (int i = 0; i < _coverSize - 1 ; ++i) {
+            for (int j = i + 1; j < _coverSize ; ++j) {
+                solver->addClause(~allLit[i * _coverSize + j]);
+            }
+        }
+
         //at least one vertex is the ith vertex in the vertex cover
         for (int i = 0; i < _coverSize; ++i) {
             for (int j = 0; j < _vtxNum; ++j) {
