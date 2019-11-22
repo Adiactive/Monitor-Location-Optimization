@@ -19,7 +19,7 @@ include_directories(${CMAKE_SOURCE_DIR}/minisat)
 
 # create the main executable
 ## add additional .cpp files if needed
-add_executable(ece650-a4 ece650-a4.cpp)
+add_executable(ece650-a4 ece650-a4.cpp Graph.h)
 # link MiniSAT libraries
 target_link_libraries(ece650-a4 minisat-lib-static)
 

@@ -3,8 +3,8 @@
 #include <sstream>
 #include <memory>
 #include <vector>
-#include "minisat/core/SolverTypes.h"
-#include "minisat/core/Solver.h"
+
+#include "Graph.h"
 using namespace std;
 
 //for error handling
@@ -12,94 +12,18 @@ struct Exception : std::runtime_error {
     explicit Exception(const char *msg) : runtime_error(msg) {}
 };
 
-void getVtxCover(int _vtxNum, const vector<int>& _edges) {
-    //allocate on the heap so that we can reset later if needed
-    std::unique_ptr<Minisat::Solver> solver(new Minisat::Solver());
-    bool res;
-    int _coverSize = 0; //vertex cover size
-    vector<Minisat::Lit> allLit;
-    Minisat::vec<Minisat::Lit> vecLit;
-    while (true) {
-        //add literals
-        for (int i = 0; i < _vtxNum * _coverSize; ++i)
-            allLit.push_back(Minisat::mkLit(solver -> newVar()));
-
-        //at least one vertex is the ith vertex in the vertex cover
-        for (int i = 0; i < _coverSize; ++i) {
-            for (int j = 0; j < _vtxNum; ++j) {
-                vecLit.push(allLit[i + j * _coverSize]);
-            }
-            solver->addClause(vecLit);
-            vecLit.clear();
-        }
-
-        //no one vertex can appear twice in a vertex cover
-        for (int i = 0; i < _vtxNum; ++i) {
-            for (int j = 0; j < _coverSize; ++j) {
-                for (int k = j + 1; k < _coverSize; ++k) {
-                    solver->addClause(~allLit[i * _coverSize + j], ~allLit[i * _coverSize + k]);
-                }
-            }
-        }
-
-        //no more than one vertex appears in the mth position of the vertex cover
-        for (int i = 0; i < _coverSize; ++i) {
-            for (int j = 0; j < _vtxNum; ++j) {
-                for (int k = j + 1; k < _vtxNum; ++k) {
-                    solver->addClause(~allLit[i + j * _coverSize], ~allLit[i + k * _coverSize]);
-                }
-            }
-        }
-
-        //Every edge is incident to at least one vertex in the vertex cover
-        for (size_t i = 0; i < _edges.size(); i += 2) {
-            int src = _edges[i], dst = _edges[i + 1];
-            for (int j = 0; j < _coverSize; ++j) {
-                vecLit.push(allLit[src * _coverSize + j]);
-                vecLit.push(allLit[dst * _coverSize + j]);
-            }
-            solver->addClause(vecLit);
-            vecLit.clear();
-        }
-
-        res = solver->solve();
-        if (res)
-            break;
-        else {
-            _coverSize++;
-            allLit.clear();
-            solver.reset(new Minisat::Solver());
-        }
-    }
-
-    //print vertex cover
-    int count = _coverSize;
-    for (int i = 0; i < _vtxNum; ++i) {
-        for (int j = 0; j < _coverSize; ++j) {
-            if (!Minisat::toInt(solver->modelValue(allLit[i * _coverSize + j]))) {
-                cout << i;
-                count--;
-                if (count)
-                    cout << ' ';
-                break;
-            }
-
-        }
-    }
-    cout << endl;
-}
-
 // parse command option
 char parseCmd(istringstream &input) {
     char cmd;
     input >> cmd;
-    if (input.fail() || (cmd != 'V' && cmd != 'E')) {
-        throw Exception("unknown command option, expect `V, E`");
+    if (input.fail() || (cmd != 'V' && cmd != 'E' && cmd != 's')) {
+        throw Exception("unknown command option, expect `V, E, s`");
     }
     return cmd;
 }
 
 int main() {
+    Graph* graph = nullptr;
     string line;
     int vtxNum = 0;
     while (!cin.eof()) {
@@ -121,6 +45,8 @@ int main() {
                 input >> vtxNum;
                 if (input.fail() || vtxNum < 0)
                     throw Exception("wrong vertex number");
+                delete graph;
+                graph = new Graph(vtxNum);
             }
 
             //read edges
@@ -139,6 +65,8 @@ int main() {
                             edges.clear();
                             throw Exception("vertex index out of range");
                         }
+                        else if (graph->exist(src, dst))
+                            throw Exception("add duplicate edge(s)");
                         else {
                             edges.push_back(src);
                             edges.push_back(dst);
@@ -147,10 +75,31 @@ int main() {
                     input >> c;
                 }
 
+                //insert edges into the graph
+                for (size_t i = 0; i < edges.size() ; i += 2) {
+                    graph->insert(edges[i], edges[i + 1]);
+                    graph->insert(edges[i + 1], edges[i]);
+                }
+
                 //compute minimum-sized vertex cover
-                getVtxCover(vtxNum, edges);
+                graph->getVtxCover(edges);
 
                 edges.clear();
+            }
+
+            /*
+             * this is a existing functionality of a2 to calculate shortest path
+             * and is reserved in a4 to maintain functional completeness
+             * may not be used
+             */
+            //search path
+            else {
+                int src, dst;
+                input >> src >> dst;
+                if (src < 0 || dst < 0 || src > vtxNum- 1 || dst > vtxNum - 1)
+                    throw Exception("vertex index out of range");
+                if (!graph->path(src, dst))
+                    throw Exception("no path Exist");
             }
         }
         catch(Exception &exp){
