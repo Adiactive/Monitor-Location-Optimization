@@ -42,6 +42,17 @@ void* CNF_SAT_VC(void* args) {
             }
         }
 
+        //reduce permutation
+        for (int l = 1; l < _coverSize; ++l) {
+            for (int i = 0; i < l; ++i) {
+                for (int j = 0; j < _vtxNum; ++j) {
+                    for (int k = j + 1; k < _vtxNum; ++k) {
+                        solver->addClause(~allLit[j * _coverSize + l], ~allLit[k * _coverSize + i]);
+                    }
+                }
+            }
+        }
+
         //at least one vertex is the ith vertex in the vertex cover
         for (int i = 0; i < _coverSize; ++i) {
             for (int j = 0; j < _vtxNum; ++j) {
