@@ -6,6 +6,9 @@
 #include "vtxcover.h"
 using namespace std;
 
+//TIME_OUT is defined in second
+#define TIME_OUT 300
+
 //for error handling
 struct Exception : std::runtime_error {
     explicit Exception(const char *msg) : runtime_error(msg) {}
@@ -24,6 +27,11 @@ char parseCmd(istringstream &input) {
 int main() {
     string line;
     int vtxNum = 0;
+    pthread_t threads[3];
+    vector<int> results[3];//store running time for each thread, for output concern
+    vector<int> edges; // store src and dst vertex index in case error input are detected
+    bool timeout = false;
+
     while (!cin.eof()) {
         try {
             // read a line of input until EOL and store in a string
@@ -48,7 +56,6 @@ int main() {
             //read edges
             else if (cmd == 'E') {
                 int src = 0, dst = 0;
-                vector<int> edges; // store src and dst vertex index in case error input are detected
                 char c = 0; // read separators
                 input >> c;
                 while (input) {
@@ -69,13 +76,16 @@ int main() {
                     input >> c;
                 }
 
-                pthread_t threads[3];
-                vector<int> results[3];
                 struct ArgStruct args[3]{
                     {vtxNum, edges, &results[0]},
                     {vtxNum, edges, &results[1]},
                     {vtxNum, edges, &results[2]}
                 };
+
+                //clear all the results
+                for (auto & r : results) {
+                    r.clear();
+                }
 
                 //CNF-SAT-VC
                 if (pthread_create(&threads[0], nullptr, &CNF_SAT_VC, (void*)&args[0]))
@@ -89,16 +99,36 @@ int main() {
                 if (pthread_create(&threads[2], nullptr, &APPROX_VC_2, (void*)&args[2]))
                     throw Exception("cannot create thread of APPROX_VC_2");
 
-                for (auto & t : threads)
-                    pthread_join(t, nullptr);
+                try {
+                    //set timeout for CNF-SAT-VC thread
+                    int runTime = 0;
+                    for (; runTime < TIME_OUT * 100; ++runTime) {
+                        if (!results[0].empty())
+                            break;
+                        usleep(10000);
+                    }
+                    if (runTime == TIME_OUT * 100)
+                        throw runtime_error("timeout");
+
+                    for (auto &t : threads)
+                        pthread_join(t, nullptr);
+
+                }
+                catch (runtime_error &e){
+                    timeout = true;
+                }
 
                 //print results
                 //CNF-SAT-VC
                 cout << "CNF-SAT-VC: ";
-                for (size_t i = 0; i < results[0].size(); ++i) {
-                    cout << results[0][i];
-                    if (i != results[0].size() - 1)
-                        cout << ',';
+                if (timeout)
+                    cout << "timeout";
+                else {
+                    for (size_t i = 0; i < results[0].size(); ++i) {
+                        cout << results[0][i];
+                        if (i != results[0].size() - 1)
+                            cout << ',';
+                    }
                 }
                 cout << endl;
 
@@ -121,9 +151,11 @@ int main() {
                 cout << endl;
 
                 //clear all the results
-                for (auto r : results) {
+                for (auto & r : results) {
                     r.clear();
                 }
+
+                timeout = false;
                 edges.clear();
             }
         }
