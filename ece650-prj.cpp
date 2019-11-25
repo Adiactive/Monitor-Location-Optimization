@@ -1,3 +1,8 @@
+/*
+ * Created by Rongzhi on 2019/11/13.
+ * Runnning time and approximate ratio are measured
+ * and output to .txt files in the Time branch
+ */
 #include <iostream>
 #include <stdexcept>
 #include <sstream>

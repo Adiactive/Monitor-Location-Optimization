@@ -102,7 +102,7 @@ void* CNF_SAT_VC(void* args) {
     }
 
 
-    //write the result to array
+    //write the solution to results[0]
     int count = _coverSize;
     for (int i = 0; i < _vtxNum; ++i) {
         for (int j = 0; j < _coverSize; ++j) {
@@ -137,6 +137,7 @@ void* APPROX_VC_1 (void* args) {
             }
         }
 
+        //write the solution to results[1]
         _result->push_back(maxDegVtx);
 
         //delete all edges incident on that vertex
@@ -148,6 +149,7 @@ void* APPROX_VC_1 (void* args) {
         }
     }
 
+    //sort solution by increasing order
     sort(_result->begin(), _result->end());
     delete[] degree;
     return nullptr;
@@ -170,10 +172,12 @@ void* APPROX_VC_2 (void* args) {
             else
                 it += 2;
         }
+        //write the solution to results[2]
         _result->push_back(u);
         _result->push_back(v);
     }
 
+    //sort solution by increasing order
     sort(_result->begin(), _result->end());
     return nullptr;
 }
