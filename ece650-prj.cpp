@@ -13,8 +13,6 @@
 #include "vtxcover.h"
 using namespace std;
 
-//TIME_OUT is defined in second
-#define TIME_OUT 300
 
 //for error handling
 struct Exception : std::runtime_error {
@@ -37,7 +35,6 @@ int main() {
     pthread_t threads[3];
     vector<int> results[3];//store running time for each thread, for output concern
     vector<int> edges; // store src and dst vertex index in case error input are detected
-    bool timeout = false;
 
     while (!cin.eof()) {
         try {
@@ -89,11 +86,6 @@ int main() {
                     {vtxNum, edges, &results[2]}
                 };
 
-                //clear all the results
-                for (auto & r : results) {
-                    r.clear();
-                }
-
                 //CNF-SAT-VC
                 if (pthread_create(&threads[0], nullptr, &CNF_SAT_VC, (void*)&args[0]))
                     throw Exception("cannot create thread of CNF-SAT-VC");
@@ -106,29 +98,13 @@ int main() {
                 if (pthread_create(&threads[2], nullptr, &APPROX_VC_2, (void*)&args[2]))
                     throw Exception("cannot create thread of APPROX_VC_2");
 
-                try {
-                    //set timeout for CNF-SAT-VC thread
-                    int runTime = 0;
-                    for (; runTime < TIME_OUT * 100; ++runTime) {
-                        if (!results[0].empty())
-                            break;
-                        usleep(10000);
-                    }
-                    if (runTime == TIME_OUT * 100)
-                        throw runtime_error("timeout");
-
-                    for (auto &t : threads)
-                        pthread_join(t, nullptr);
-
-                }
-                catch (runtime_error &e){
-                    timeout = true;
-                }
+                for (auto &t : threads)
+                    pthread_join(t, nullptr);
 
                 //print results
                 //CNF-SAT-VC
                 cout << "CNF-SAT-VC: ";
-                if (timeout)
+                if (results[0][0] == IS_TIME_OUT)
                     cout << "timeout";
                 else {
                     for (size_t i = 0; i < results[0].size(); ++i) {
@@ -162,7 +138,6 @@ int main() {
                     r.clear();
                 }
 
-                timeout = false;
                 edges.clear();
             }
         }

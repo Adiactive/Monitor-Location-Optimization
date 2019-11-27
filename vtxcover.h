@@ -8,9 +8,14 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <thread>
 #include "minisat/core/SolverTypes.h"
 #include "minisat/core/Solver.h"
 using namespace std;
+
+//TIME_OUT is defined in second
+#define TIME_OUT 300
+#define IS_TIME_OUT (-1)
 
 struct ArgStruct {
     const int& vtxNum;
@@ -18,18 +23,34 @@ struct ArgStruct {
     vector<int>* result;
 };
 
-void* CNF_SAT_VC(void* args) {
-    auto* _args = (struct ArgStruct*) args;
-    const int& _vtxNum = _args->vtxNum;
-    const vector<int>& _edges = _args->edges;
-    vector<int>* _result = _args->result;
+void checkTimeout(std::unique_ptr<Minisat::Solver>& _solver, bool& _isTimeout, bool& _isSolved) {
+    for (int i = 0; i < TIME_OUT * 10; ++i) {
+        if (_isSolved)
+            return;
+        usleep(100000);
+    }
+    _isTimeout = true;
+    _solver->interrupt();
+}
 
+void* CNF_SAT_VC(void* args) {
     //allocate on the heap so that we can reset later if needed
     std::unique_ptr<Minisat::Solver> solver(new Minisat::Solver());
     bool res;
     int _coverSize = 0; //vertex cover size
     vector<Minisat::Lit> allLit;
     Minisat::vec<Minisat::Lit> vecLit;
+
+    //create a thread to check for timeout
+    bool isTimeout = false;
+    bool isSolved = false;
+    thread t(checkTimeout, ref(solver), ref(isTimeout), ref(isSolved));
+
+    auto* _args = (struct ArgStruct*) args;
+    const int& _vtxNum = _args->vtxNum;
+    const vector<int>& _edges = _args->edges;
+    vector<int>* _result = _args->result;
+
     while (true) {
         //add literals
         for (int i = 0; i < _vtxNum * _coverSize; ++i)
@@ -91,16 +112,25 @@ void* CNF_SAT_VC(void* args) {
             vecLit.clear();
         }
 
+        solver->clearInterrupt();
         res = solver->solve();
-        if (res)
+        if (res) {
+            //terminate checkTimeout thread
+            isSolved = true;
+            t.join();
             break;
+        }
+        else if (isTimeout) {
+            _result->push_back(IS_TIME_OUT);
+            t.join();
+            return nullptr;
+        }
         else {
             _coverSize++;
             allLit.clear();
             solver.reset(new Minisat::Solver());
         }
     }
-
 
     //write the solution to results[0]
     int count = _coverSize;
@@ -114,6 +144,8 @@ void* CNF_SAT_VC(void* args) {
             }
         }
     }
+
+    //should never reach here
     return nullptr;
 }
 
