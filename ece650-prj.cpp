@@ -1,9 +1,8 @@
 /*
  * Created by Rongzhi on 2019/11/13.
- * runnning time and approximate ratio of three methods
- * are measured and output to output_1.txt and output_2.txt
- * only result files in master branch
- * see detailed codes in Time branch
+ * see detailed codes measuring running time
+ * and approximate ratio of the three methods
+ * in Time branch
  */
 #include <iostream>
 #include <stdexcept>
