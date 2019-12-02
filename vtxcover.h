@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include <thread>
+#include<algorithm>
 #include "minisat/core/SolverTypes.h"
 #include "minisat/core/Solver.h"
 using namespace std;
