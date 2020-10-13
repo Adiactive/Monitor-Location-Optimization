@@ -73,19 +73,6 @@ class MyTest(unittest.TestCase):
         with self.assertRaises(Exception):
             st_test.remove([' Weber Street '])
 
-    '''
-    def test_isupper(self):
-        """Test isupper() function of class string"""
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('foo'.isupper())
-        self.assertFalse('foo'.isupper())
-        self.assertFalse('Foo'.isupper())
-
-    def test_failing(self):
-        """A test that fails"""
-        self.assertEqual(True, False)
-    '''
-
 
 if __name__ == '__main__':
     unittest.main()
