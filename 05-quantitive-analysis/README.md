@@ -6,6 +6,8 @@ It will solve a particular kind of optimization problem, called the Vertex Cover
 context. The idea is for the police to be able to minimize the number of cameras they need to
 install, and still be as effective as possible with their monitoring.
 
+Acknowledge the contribution of Xiaoyi Zheng in report writing.
+
 More details [here](https://github.com/Adiactive/Monitor-Location-Optimization/blob/master/05-quantitive-analysis/ece650.project.pdf).
 
 ### Overview
@@ -21,5 +23,7 @@ cd path/to/module
 git clone https://github.com/agurfinkel/minisat
 mkdir build && cd build && cmake ../ && make install
 ```
+
+
 
 
