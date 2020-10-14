@@ -15,6 +15,13 @@ The program takes input from standard input, and outputs to standard output. It 
 The graph is specified by the specification of the set of vertices `V` followed by the set of edges `E`,
 in that order. `V` and `E` always occur together.
 
+### Build Guide
+
+```
+cd path/to/module
+mkdir build && cd build && cmake ../ && make install
+```
+
 ### Commands
 
 + `V` specify the number of vertex in a graph
